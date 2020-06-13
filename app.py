@@ -39,9 +39,13 @@ def get_menu():
 
 @app.route("/")
 def index():
-    
+    if am_i_here() == True:
+        title = "게시판 사용"
+    else:
+        title = "login 을 하셔야 사용가능합니다."
     return render_template('template.html',
                             owner = who_am_i(),
+                            title = title,
                             menu = get_menu())
 
 @app.route("/login", methods = ["GET","POST"])
@@ -78,6 +82,49 @@ def login():
 
 @app.route('/logout')
 def logout():
+    session.pop('user', None)
+    return redirect('/')
+
+@app.route('/join', methods=['GET','POST'])
+def join():
+    if am_i_here() == True:
+        return redirect('/')
+    
+    title = " 가입해 주십시요."
+    if request.method == "POST":
+        cursor = db.cursor()
+        cursor.execute(f"""
+            select name from author
+            where name = '{request.form['id']}'
+        """)
+        user = cursor.fetchone()
+        if user == None:
+            cursor = db.cursor()
+            cursor.execute(f"""
+                insert into author (name, profile, password)
+                values ( '{request.form['id']}',
+                        '{request.form['pf']}',
+                        SHA2('{request.form['pw']}', 256))
+
+            """)
+            db.commit()
+            return redirect('/')
+        else:
+            title = '이미 가입한 login ID 입니다.'
+    return render_template('join.html',
+                            owner= who_am_i(),
+                            title = title)
+
+@app.route('/withdraw')
+def withdraw():
+    if am_i_here() == False:
+        return redirect('/')
+    cursor = db.cursor()
+    cursor.execute(f"""
+        delete from author
+        where name = '{session['user']['name']}'
+    """)
+    db.commit()
     session.pop('user', None)
     return redirect('/')
 
