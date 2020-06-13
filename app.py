@@ -67,11 +67,32 @@ def get_post(id):
 
 @app.route('/write', methods = ["GET","POST"])
 def write_post():
-
+    if am_i_here() == False:
+        return redirect('/')
+    if request.method == 'POST':
+        cursor = db.cursor()
+        cursor.execute(f"""
+            insert into topic (title, description, created, author_id)
+            values("{request.form['title']}",
+                    "{request.form['description']}",
+                    "{datetime.now()}",
+                    "{session['user']['id']}")
+        """)
+        db.commit()
+        return redirect('/')
+    else:
+        title = "게시물 작성을 부탁드립니다."  
     return render_template('write_post.html',
                             owner = who_am_i(),
-                            title = title,
-                            menu = get_menu())
+                            title = title)
+
+@app.route('/update/')
+def update_wrong():
+    return redirect('/')
+
+@app.route('/delete/')
+def delete_wrong():
+    return redirect('/')
 
 @app.route("/login", methods = ["GET","POST"])
 def login():
