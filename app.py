@@ -1,16 +1,85 @@
-from flask import Flask, abort, render_template
+from flask import Flask, render_template, request, session
+from flask import abort, redirect
+import pymysql
+from datetime import datetime
 
 app = Flask(__name__,
             template_folder= 'template')
 
+db = pymysql.connect(user = 'root',
+                    passwd = 'avante',
+                    db = 'web',
+                    host = 'localhost',
+                    charset = 'utf8',
+                    cursorclass = pymysql.cursors.DictCursor)
+
+app.secret_key = 'who are you?'
 app.config['ENV'] = 'Development'
 app.config['DEBUG'] = True
 
+def who_am_i():
+    return session['user']['name'] if 'user' in session else "Hi ! Everybody ~"
+def am_i_here():
+    return True if 'user' in session else False
+
+def get_menu():
+    if am_i_here() == False:
+        return '현재 시간은 '+ datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cursor = db.cursor()
+    cursor.execute(f"""
+        select id, title from topic 
+    """)
+    title = cursor.fetchall()
+    menu=[]
+    for i in title:
+        menu.append(f"""
+        <li><a href='{i['id']}'>{i['title']}</a></li>
+        """)
+    return '\n'.join(menu)
+
 @app.route("/")
 def index():
-    owner = " Hi! Everybody !"
+    
     return render_template('template.html',
-                            owner = owner)
+                            owner = who_am_i(),
+                            menu = get_menu())
+
+@app.route("/login", methods = ["GET","POST"])
+def login():
+    if am_i_here() == True:
+        return redirect('/')
+    if request.method == "POST":
+        cursor = db.cursor()
+        cursor.execute(f"""
+            select name from author 
+            where name = '{request.form['id']}'
+        """)
+        user = cursor.fetchone()
+        if user != None:
+            cursor = db.cursor()
+            cursor.execute(f"""
+                select id, name, password from author
+                where name = "{request.form['id']}" and
+                password = SHA2("{request.form['pw']}", 256)
+            """)
+            user = cursor.fetchone()
+            if user != None:
+                session['user'] = user
+                return redirect('/')
+            else:
+                title = " 입력하신 Password 가 잘못되었읍니다. 다시 입력하세요."
+        else:
+            title = " 입력하신 login ID 는 등록이 안되어 있읍니다."
+    else:
+        title = " please, login first"
+    return render_template('login.html',
+                            owner = who_am_i(),
+                            title = title)
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect('/')
 
 @app.route("/favicon.ico")
 def favicon():

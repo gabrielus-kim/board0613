@@ -20,5 +20,11 @@
         <ol>
             {{ menu | safe }}
         </ol>
+        <form action='/login', method = 'POST'>
+            <p><input type='text' name='id' placeholder='please login ID' autofocus required></p>
+            <p><input type='password' name='pw' placeholder="password" required></p>
+            <p><button type='submit'>login</button></p>
+        </form>
+        
     </body>
 </html>
