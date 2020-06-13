@@ -20,10 +20,10 @@
         <ol>
             {{ menu | safe }}
         </ol>
-        <form action='/write', method = 'POST'>
-            <p><input type='text' name='title' placeholder='insert title' autofocus required></p>
-            <p><textarea cols=40 rows=10 name='description' placeholder="insert context" required></textarea></p>
-            <p><button type='submit'>게시판 글작성</button></p>
+        <form action='/update/{{id}}', method = 'POST'>
+            <p><input type='text' name='title' value='{{update_title}}' autofocus required></p>
+            <p><textarea cols=40 rows=10 name='description'  required>{{update_content}}</textarea></p>
+            <p><button type='submit'>게시판 글수정</button></p>
         </form>
         
     </body>

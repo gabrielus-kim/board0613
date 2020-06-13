@@ -94,6 +94,39 @@ def update_wrong():
 def delete_wrong():
     return redirect('/')
 
+@app.route('/update/<id>', methods = ["GET","POST"])
+def update_post(id): 
+    cursor = db.cursor()
+    cursor.execute(f"""
+        select id, title, description from topic
+        where id = '{id}'
+    """)
+    post = cursor.fetchone()
+    if request.method == "POST":
+        cursor = db.cursor()
+        cursor.execute(f"""
+            update topic set description = '{request.form['description']}'
+            where id = '{id}'
+        """)
+        db.commit()
+        return redirect("/")
+    return render_template('update_post.html',
+                            owner = who_am_i(),
+                            id = id,
+                            update_title = post['title'],
+                            update_content = post['description'])
+
+
+@app.route('/delete/<id>')
+def delete_post(id):
+    cursor = db.cursor()
+    cursor.execute(f"""
+        delete from topic
+        where id ='{id}'
+    """)
+    db.commit()
+    return redirect('/')
+
 @app.route("/login", methods = ["GET","POST"])
 def login():
     if am_i_here() == True:
