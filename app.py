@@ -115,18 +115,31 @@ def join():
                             owner= who_am_i(),
                             title = title)
 
-@app.route('/withdraw')
+@app.route('/withdraw', methods = ['GET','POST'])
 def withdraw():
     if am_i_here() == False:
         return redirect('/')
-    cursor = db.cursor()
-    cursor.execute(f"""
-        delete from author
-        where name = '{session['user']['name']}'
-    """)
-    db.commit()
-    session.pop('user', None)
-    return redirect('/')
+    if request.method == 'POST':
+        if request.form['subject'] == 'yes':
+            cursor = db.cursor()
+            cursor.execute(f"""
+                delete from author
+                where name = '{session['user']['name']}'
+            """)
+            db.commit()
+            title = session['user']['name'] + "님 정상적으로 회원 탈퇴가 되었읍니다."
+            session.pop('user', None)
+        else:
+            title = " 회원 탈퇴 요청을 반려하셨읍니다. 감사합니다."
+        return render_template('template.html',
+                                owner = who_am_i(),
+                                title = title,
+                                menu = get_menu())
+    else:
+        title = '정말로 회원 탈퇴를 하시겠읍니까?'
+    return render_template('withdraw.html',
+                            title = title,
+                            owner = who_am_i())
 
 @app.route("/favicon.ico")
 def favicon():

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Web board</title>
+        <meta charset='utf-8'>
+    </head>
+    <body>
+        <a href='/'><h1>Welcome my world : {{ owner }}</h1></a>
+        <a href='/login'>login</a>
+        <a href='/logout'>logout</a>
+        <a href='/join'>join</a>
+        <a href='/withdraw'>withdraw</a><br><br>
+        <a href='/write'>write</a>
+        <a href='/update'>update</a>
+        <a href='/delete'>delete</a>
+
+        <h2>{{ title }}</h2>
+        {{ content}}
+
+        <ol>
+            {{ menu | safe }}
+        </ol>
+        <form action='/withdraw', method = 'POST'>
+            <button name='subject' type='submit' value="yes">YES</button>
+            <button name='subject' type='submit' value="no">NO</button>
+        </form>
+        
+    </body>
+</html>
