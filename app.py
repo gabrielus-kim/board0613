@@ -48,6 +48,31 @@ def index():
                             title = title,
                             menu = get_menu())
 
+@app.route('/<id>')
+def get_post(id):
+    if am_i_here() == False:
+        return redirect('/')
+    cursor = db.cursor()
+    cursor.execute(f"""
+        select id, title, description from topic
+        where id = '{id}'
+    """)
+    post = cursor.fetchone()
+    return render_template('template.html',
+                            owner = who_am_i(),
+                            id = id,
+                            title = post['title'],
+                            content = post['description'],
+                            menu = get_menu())
+
+@app.route('/write', methods = ["GET","POST"])
+def write_post():
+
+    return render_template('write_post.html',
+                            owner = who_am_i(),
+                            title = title,
+                            menu = get_menu())
+
 @app.route("/login", methods = ["GET","POST"])
 def login():
     if am_i_here() == True:
